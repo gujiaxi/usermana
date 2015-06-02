@@ -74,7 +74,7 @@ echo "
 </table>
 
 <div id='submit'>
-<input type='submit' name='update' value='更新' />
+<input type='submit' name='update' value='删除' />
 <input type='submit' name='gencode' value='生成邀请码' />
 </div>
 </form>";
