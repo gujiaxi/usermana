@@ -19,13 +19,16 @@ if(!empty($_POST))
 	$confirm_pass = trim($_POST["passwordc"]);
 	$captcha = md5($_POST["captcha"]);
 
-    $invcode = trim($_POST["inv_code"]);
+    $ivt_code = trim($_POST["ivt_code"]);
     $real_name = trim($_POST["real_name"]);
     $email = trim($_POST["email"]);
 
-    if ($invcode != "1234")
+    if (!inviteCodeExists($ivt_code))
     {
         $errors[] = "Wrong invitation code!";
+    }
+    else {
+        updateInviteCode($ivt_code, $username, $email);
     }
 
 	if ($captcha != $_SESSION['captcha'])
@@ -55,7 +58,8 @@ if(!empty($_POST))
 	if(count($errors) == 0)
 	{
 		//Construct a user object
-		$user = new User($username,$password,$real_name,$email);
+		// $user = new User($username,$password,$real_name,$email);
+        $user = new User($username, $password, $real_name, $email);
 
 		//Checking this flag tells us whether there were any errors such as possible data duplication occured
 		if(!$user->status)
@@ -108,7 +112,7 @@ echo "
 </p>
 <p>
 <label>邀请码:</label>
-<input type='text' name='inv_code' />
+<input type='text' name='ivt_code' />
 </p>
 <p>
 <label>密码:</label>
@@ -140,13 +144,13 @@ echo "
 </p>
 <p>
 <label>注册类型:</label>
-<input type='radio' name='reg_type' value='teacher' />教师 - 职称<input type='text' name=reg_title />
-<input type='radio' name='reg_type' value='student' />学生
+<input type='checkbox' name='reg_type[0]' value='teacher' />教师 - 职称<input type='text' name=reg_type_extra />
+<input type='checkbox' name='reg_type[1]' value='student' />学生
 </p>
 <p>
 <label>支付状态:</label>
-<input type='radio' name='pay_state' />已支付
-<input type='radio' name='pay_state' />未支付
+<input type='radio' name='pay_state' value='paid' />已支付
+<input type='radio' name='pay_state' value='unpaid' checked='checked' />未支付
 </p>
 <p>
 <label>单位:</label>
@@ -177,8 +181,8 @@ echo "
 </p>
 <p>
 <h4>【返程】</h4>
-<label>车次/航班</label
-><input type='text' name='trip_out_flight' /><br/>
+<label>车次/航班</label>
+<input type='text' name='trip_out_flight' /><br/>
 <label>出发站点</label>
 <input type='text' name='trip_out_site' /><br/>
 <label>出发时间</label>
@@ -186,7 +190,7 @@ echo "
 </p>
 <p>
 <label>注册费发票抬头:</label>
-<input type='radio' name='invoice_title' value='same' />与所在单位名称一致
+<input type='radio' name='invoice_title' value='same' checked='checked' />与所在单位名称一致
 <input type='radio' name='invoice_title' value='others' />其他<input type='text' name='invoice_title_extra' />
 </p>
 <p>
@@ -194,22 +198,22 @@ echo "
 <input type='checkbox' name='invoice_content' value='i1' />注册费
 <input type='checkbox' name='invoice_content' value='i2' />会员费
 <input type='checkbox' name='invoice_content' value='i3' />会务费
-<input type='checkbox' name='invoice_content' value='i3' />培训费
+<input type='checkbox' name='invoice_content' value='i4' />培训费
 </p>
 <p>
 <label>入住日期</label>
-<input type='text' name='accommodation_in_date' />
+<input type='text' name='accom_in_date' />
 </p>
 <p>
 <label>离开日期</label>
-<input type='text' name='accommodation_out_date' />
+<input type='text' name='accom_out_date' />
 </p>
 <p>
 <label>酒店类型</label>
-<input type='checkbox' name='accommodation_type' value='a' />A
-<input type='checkbox' name='accommodation_type' value='b' />B
-<input type='checkbox' name='accommodation_type' value='s' />单住
-<input type='checkbox' name='accommodation_type' value='c' />合住
+<input type='checkbox' name='accom_type[0]' value='a' />A
+<input type='checkbox' name='accom_type[1]' value='b' />B
+<input type='checkbox' name='accom_type[2]' value='s' />单住
+<input type='checkbox' name='accom_type[3]' value='c' />合住
 </p>
 
 <p>

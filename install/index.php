@@ -146,6 +146,32 @@ if(isset($_GET["install"]))
 	(13, 2, 17);
 	";
 
+    $invite_codes_sql = "
+    CREATE TABLE IF NOT EXISTS `".$db_table_prefix."invite_codes` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `ivt_code` varchar(10) NOT NULL,
+    `username` varchar(50),
+    `email` varchar(150),
+    PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+    ";
+    $stmt = $mysqli->prepare($invite_codes_sql);
+    if($stmt->execute())
+    {
+        echo "<p>".$db_table_prefix."invite_codes table created.....</p>";
+    }
+
+    $invite_codes_entry = "
+    INSERT INTO `".$db_table_prefix."invite_codes` (`ivt_code`) VALUES
+    ('greenorbs');
+    ";
+    $stmt = $mysqli->prepare($invite_codes_entry);
+    if($stmt->execute())
+    {
+        echo "<p>Inserted an initial invite code 'greenorbs' into ".$db_table_prefix."invite_codes.</p>";
+    }
+
+
 	$stmt = $mysqli->prepare($configuration_sql);
 	if($stmt->execute())
 	{

@@ -1157,4 +1157,102 @@ function securePage($uri){
 	}
 }
 
+//Fetch all invite codes
+function fetchAllInviteCodes(){
+    global $mysqli,$db_table_prefix;
+    $stmt = $mysqli->prepare("SELECT
+        id,
+        ivt_code,
+        username,
+        email
+        FROM ".$db_table_prefix."invite_codes");
+    $stmt->execute();
+    $stmt->bind_result($id, $ivt_code, $username, $email);
+
+    $row=null;
+    while ($stmt->fetch()) {
+        $row[] = array('id' => $id, 'ivt_code' => $ivt_code, 'username' => $username, 'email' => $email);
+    }
+    $stmt->close();
+    return $row;
+}
+
+//Generate an invite code
+function genInviteCode(){
+    static $ivt_code = '';
+    $uid = uniqid ( "", true );
+
+    $data = $_SERVER ['REQUEST_TIME'];
+    $data .= $_SERVER ['SERVER_ADDR'];
+    $data .= $_SERVER ['SERVER_PORT'];
+    $data .= $_SERVER ['REMOTE_ADDR'];
+    $data .= $_SERVER ['REMOTE_PORT'];
+
+    $hash = strtoupper ( hash ( 'ripemd128', $uid . $ivt_code . md5 ( $data ) ) );
+    $ivt_code = substr ( $hash, 0, 8 ) ;
+
+    // Insert generated invite codes to db
+    global $mysqli,$db_table_prefix;
+    $stmt = $mysqli->prepare("INSERT INTO ".$db_table_prefix."invite_codes (
+        ivt_code)
+        VALUES (
+        ?
+        )");
+    $stmt->bind_param("s", $ivt_code);
+    $result = $stmt->execute();
+    $stmt->close();
+    
+    return $ivt_code;
+}
+
+//Check if invite code exists
+function inviteCodeExists($ivt_code){
+    global $mysqli,$db_table_prefix;
+    $stmt = $mysqli->prepare("SELECT ivt_code
+        FROM ".$db_table_prefix."invite_codes
+        WHERE
+        ivt_code = ?");
+    $stmt->bind_param("s", $ivt_code);
+    $stmt->execute();
+    $stmt->store_result();
+    $num_returns = $stmt->num_rows;
+    $stmt->close();
+
+    if ($num_returns > 0)
+    {
+        return true;
+    }
+    else return false;
+}
+
+//Update invited user information
+function updateInviteCode($ivt_code, $username, $email){
+    global $mysqli,$db_table_prefix;
+    $stmt = $mysqli->prepare("UPDATE ".$db_table_prefix."invite_codes
+        SET
+        username = ?,
+        email = ?
+        WHERE
+        ivt_code = ?
+        LIMIT 1");
+    $stmt->bind_param("sss", $username, $email, $ivt_code);
+    $result = $stmt->execute();
+    $stmt->close();
+    return $result;
+}
+
+function deleteInviteCodes($ivt_ids) {
+    global $mysqli,$db_table_prefix;
+    $i = 0;
+    $stmt = $mysqli->prepare("DELETE FROM ".$db_table_prefix."invite_codes
+        WHERE id = ?");
+    foreach($ivt_ids as $ivt_id) {
+        $stmt->bind_param("i", $ivt_id);
+        $stmt->execute();
+        $i++;
+    }
+    $stmt->close();
+    return $i;
+}
+        
 ?>

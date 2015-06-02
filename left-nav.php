@@ -21,6 +21,7 @@ if(isUserLoggedIn()) {
 	<ul>
 	<li><a href='admin_configuration.php'>网站设置</a></li>
 	<li><a href='admin_users.php'>用户管理</a></li>
+	<li><a href='admin_ivt.php'>邀请管理</a></li>
 	<li><a href='admin_permissions.php'>权限管理</a></li>
 	<li><a href='admin_pages.php'>页面管理</a></li>
 	</ul>";
